@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solar Fault Analyzer AI Dashboard</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <div class="overlay"></div>
+    <div class="container">
+
+        <div class="header">
+            <img src="PIC/icon.avif" alt="Solar Panel Icon" class="logo">
+            <div>
+                <h1>Solar Fault Analyzer</h1>
+                <h2>AI Dashboard for Real-time Sensor Diagnosis</h2>
+            </div>
+        </div>
+
+        <div class="nav-bar">
+            <a href="home.html" class="nav-link">Home</a>
+            <a href="Predict.html" class="nav-link" style="color: #64FFDA; border-bottom: 2px solid #64FFDA;">AI
+                Diagnostic
+                Tool</a>
+            <a href="Introduce.html" class="nav-link">Project Team</a>
+        </div>
+
+        <form id="sensorForm">
+            <div class="input-form">
+                <div class="input-group">
+                    <label for="voltage">Voltage (V)</label>
+                    <input type="number" id="voltage" step="any" value="15.0" required>
+                </div>
+                <div class="input-group">
+                    <label for="temperature">Temperature (C)</label>
+                    <input type="number" id="temperature" step="any" value="55.0" required>
+                </div>
+                <div class="input-group">
+                    <label for="dust">Dust Level (%)</label>
+                    <input type="number" id="dust" step="any" value="80.0" min="0" max="100" required>
+                </div>
+                <div class="input-group">
+                    <label for="lightIntensity">Light Intensity (%)</label>
+                    <input type="number" id="lightIntensity" step="any" value="75.0" min="0" max="100" required>
+                </div>
+            </div>
+            <button type="submit">RUN AI ANALYSIS</button>
+        </form>
+
+        <div id="result-box" class="status-warning">
+            Awaiting Analysis...
+        </div>
+
+        <h2>Probability Breakdown</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 30%;">Problem Class</th>
+                    <th style="width: 70%;">Probability Score</th>
+                </tr>
+            </thead>
+            <tbody id="probabilityTable">
+                <tr>
+                    <td colspan="2" style="text-align: center;">Run analysis to see probabilities.</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+<script>
+    document.getElementById('sensorForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        // --- ส่วนของการแปลงค่า ---
+        // 1. กำหนดค่าสูงสุดของเซ็นเซอร์ (สำคัญ: ต้องเป็นค่าที่สอดคล้องกับโมเดล AI ของคุณ)
+        const MAX_DUST_VALUE = 1000; // ug/m3
+        const MAX_IRRADIANCE_VALUE = 2000; // lx
+
+        // 2. ดึงค่าเปอร์เซ็นต์จากฟอร์ม
+        const dustPercent = parseFloat(document.getElementById('dust').value);
+        const lightPercent = parseFloat(document.getElementById('lightIntensity').value); // ใช้ id ใหม่
+
+        // 3. คำนวณกลับเป็นค่าจริง
+        const calculatedDust = (dustPercent / 100) * MAX_DUST_VALUE;
+        const calculatedIrradiance = (lightPercent / 100) * MAX_IRRADIANCE_VALUE;
+        
+        // 4. สร้าง payload เพื่อส่งไปยัง backend โดยใช้ค่าที่คำนวณแล้ว
+        const payload = {
+            voltage: parseFloat(document.getElementById('voltage').value),
+            temperature: parseFloat(document.getElementById('temperature').value),
+            dust: calculatedDust,
+            irradiance: calculatedIrradiance 
+        };
+        // --- จบส่วนของการแปลงค่า ---
+
+
+        const resultBox = document.getElementById('result-box');
+        const tableBody = document.getElementById('probabilityTable');
+        
+        resultBox.innerText = "Analyzing...";
+        resultBox.className = 'status-warning';
+        resultBox.style.animation = 'none';
+        tableBody.innerHTML = ''; 
+
+        try {
+            const response = await fetch("https://g4weds.consolutechcloud.com/backend/predict", {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json(); 
+                if (errorData && errorData.result) {
+                    resultBox.innerText = `STATUS: ${errorData.result}`;
+                    resultBox.className = 'status-error';
+                } else {
+                    throw new Error(errorData.error || `Request failed with status ${response.status}`);
+                }
+                return; 
+            }
+
+            const result = await response.json();
+            const summaryReport = result.result;
+            resultBox.innerText = `STATUS: ${summaryReport}`;
+
+            if (summaryReport.includes('ปกติ')) {
+                resultBox.className = 'status-normal';
+            } else {
+                resultBox.className = 'status-error';
+            }
+            resultBox.style.animation = 'pulse 1.5s infinite alternate';
+
+            const probabilities = result.probabilities;
+            const sortedProbabilities = Object.entries(probabilities).sort(([, probA], [, probB]) => probB - probA);
+
+            sortedProbabilities.forEach(([label, prob]) => {
+                const row = tableBody.insertRow();
+                const probPercent = (prob * 100).toFixed(2);
+                row.insertCell(0).innerText = label;
+                const probCell = row.insertCell(1);
+                probCell.innerHTML = `
+                    ${probPercent}%
+                    <div class="prob-bar-container">
+                        <div class="prob-bar" style="width: ${probPercent}%;"></div>
+                    </div>
+                `;
+            });
+
+        } catch (error) {
+            resultBox.innerText = `ERROR: ${error.message}`;
+            resultBox.className = 'status-error';
+            console.error("Fetch error:", error);
+        }
+    });
+</script>
+</body>
+
+</html>

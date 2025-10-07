@@ -1,0 +1,205 @@
+/* =================================================================
+   styles.css (เวอร์ชันแก้ไข - ปรับฟอร์มหน้า Predict ให้ Responsive)
+   ================================================================= */
+
+/* --- ✅ [ใหม่] กฎเหล็กข้อที่ 1: เปลี่ยน Box Model --- */
+* {
+    box-sizing: border-box;
+}
+
+/* --- 1. สไตล์เริ่มต้น (สำหรับมือถือ) --- */
+
+html,
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-image: url('PIC/solar.jpg');
+    background-size: cover;
+    background-attachment: fixed;
+    background-color: #0A192F;
+    color: #C5C9D0;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+}
+
+.container {
+    width: 100%;
+    max-width: 1000px;
+    margin: auto;
+    padding: 20px 15px;
+    background: rgba(16, 42, 67, 0.95);
+}
+
+.header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.logo {
+    width: 50px;
+    height: 50px;
+}
+
+h1 {
+    margin: 0;
+    font-size: 1.6em;
+}
+
+h2 {
+    margin: 0;
+    font-size: 1.0em;
+    color: #8892B0;
+}
+
+h3 {
+    margin: 10px 0 5px 0;
+    color: #64FFDA;
+    font-size: 1.1em;
+}
+
+.nav-bar {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 25px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #233554;
+}
+
+.nav-link {
+    color: #8892B0;
+    text-decoration: none;
+    padding: 8px 12px;
+    border-radius: 4px;
+    transition: background-color 0.3s;
+}
+
+/* --- ✅ [ใหม่] สไตล์สำหรับฟอร์มในหน้า Predict (Mobile First) --- */
+.input-form {
+    display: flex;
+    flex-direction: column;
+    /* เรียงช่องกรอกเป็นแนวตั้ง */
+    gap: 15px;
+    /* ระยะห่างระหว่างช่อง */
+    margin-bottom: 20px;
+}
+
+.input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    /* ระยะห่างระหว่าง Label กับ Input */
+}
+
+input[type="number"] {
+    width: 100%;
+    /* ทำให้ Input กว้างเต็ม 100% ของกรอบ */
+    padding: 10px;
+    border-radius: 4px;
+    border: 1px solid #233554;
+    background-color: #0A192F;
+    color: #CCD6F6;
+    font-size: 1rem;
+}
+
+button[type="submit"] {
+    width: 100%;
+    padding: 15px;
+    background-color: #64FFDA;
+    color: #0A192F;
+    border: none;
+    border-radius: 4px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+/* --- การ์ดแนะนำตัว (สำหรับมือถือ) --- */
+.member-card-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.member-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 15px;
+    background: rgba(0, 0, 0, 0.4);
+    padding: 20px;
+    border-radius: 8px;
+    border-left: 5px solid #64FFDA;
+}
+
+.member-photo {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    border: 3px solid #64FFDA;
+    object-fit: cover;
+}
+
+
+/* --- 2. Media Queries (สำหรับจอที่ใหญ่ขึ้น) --- */
+
+@media (min-width: 768px) {
+    .container {
+        padding: 30px;
+        border-radius: 12px;
+    }
+
+    .header {
+        flex-direction: row;
+        text-align: left;
+    }
+
+    h1 {
+        font-size: 2.2em;
+    }
+
+    h2 {
+        font-size: 1.2em;
+    }
+
+    /* ✅ [ใหม่] เปลี่ยนการจัดเรียงฟอร์มเป็นแนวนอนสำหรับจอใหญ่ */
+    .input-form {
+        flex-direction: row;
+        /* กลับมาเรียงแนวนอน */
+        flex-wrap: wrap;
+        /* อนุญาตให้ขึ้นบรรทัดใหม่ได้ */
+    }
+
+    .input-group {
+        flex: 1;
+        /* ให้แต่ละช่องพยายามขยายเท่าๆ กัน */
+        min-width: 200px;
+        /* กำหนดความกว้างขั้นต่ำก่อนขึ้นบรรทัดใหม่ */
+    }
+
+    .member-card-container {
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: space-between;
+    }
+
+    .member-card {
+        flex-direction: row;
+        text-align: left;
+        width: calc(50% - 10px);
+    }
+}
+
+@media (min-width: 1024px) {
+    .container {
+        padding: 40px;
+    }
+}
